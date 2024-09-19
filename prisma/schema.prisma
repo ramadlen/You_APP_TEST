@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  username     String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  password     String
+  user_agent   String
+  token        String
+  refreshToken String?  // Kolom untuk menyimpan refresh token
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  About About[]
+  Chat   Chat[]
+  zodiac                Zodiac[]
+   messages                   Message[]
+  @@map("users")
+}
+
+model About {
+  id                         String     @id @default(auto()) @map("_id") @db.ObjectId
+  Display_name               String
+  Image_profile_zodiac       String
+  Image_zodiac               String
+  Birthday                   DateTime
+  Gender                     String
+  Height                     String?
+  Weight                     String  
+  username                   String @db.ObjectId
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+ 
+  Interest              Interest[]
+  
+  user      User      @relation(fields: [username], references: [username])
+  @@map("about")
+}
+
+model Zodiac {
+  id                         String     @id @default(auto()) @map("_id") @db.ObjectId
+  zodiac_name                String?
+  zodiac_date                DateTime
+  username                   String @db.ObjectId
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  about                      User      @relation(fields: [username], references: [username])
+  Horoscope                   Horoscope[]
+  
+  @@map("zodiac")
+}
+
+model Horoscope{
+  id                         String     @id @default(auto()) @map("_id") @db.ObjectId
+  zodiac_id                  String @db.ObjectId
+  zodiac_chinese             String?
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  zodiac                     Zodiac      @relation(fields: [zodiac_id], references: [id])
+ @@map("horoscope")
+}
+model Interest {
+  id                        String     @id @default(auto()) @map("_id") @db.ObjectId
+  Interest_user             String  
+  about_id                  String @db.ObjectId
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  about                     About      @relation(fields: [about_id], references: [id])
+
+  @@map("interest")
+}
+model Chat{
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  senderID    String
+  receiverID  String
+  message     String
+  user_id     String @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User      @relation(fields: [user_id], references: [username])
+
+   @@map("chat")
+}
+
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  senderId  String
+  receiverId String
+  content   String
+  user_id   String @db.ObjectId
+  createdAt DateTime @default(now())
+    user         User      @relation(fields: [user_id], references: [username])
+
+  
+}
